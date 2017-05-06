@@ -5,3 +5,8 @@
 .maincontent {
 	padding: 1em;
 }
+
+a:hover {
+	cursor: pointer;
+	
+}
