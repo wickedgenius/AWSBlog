@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>AWSBlog</title>
+
+		<link rel="stylesheet" href="css/main.css" />
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-12" style="height:1em"></div>
+				<div class="col-12" >
+					<h1 class="">AWSBlog</h1>
+				</div>
+				<div class="col-12" style="height:1em"></div>
+				<div class="col-8" id="posts">
+					
+				
+					<div>
+						<nav>
+							<ul class="pagination" id="pagination">
+							</ul>
+						</nav>
+					</div>
+				</div>
+				<div class="col-3 offset-1">
+					<div class="border-0 rounded">
+						<ul class="nav flex-column">
+							<li class="nav-item">
+								<a class="nav-link" href="index.html">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="index.html">About</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+		<script src="js/AWSBlogSettings.js"></script>
+		<script type="text/javascript">
+			function datesort(b, a) {
+				var da = new Date(a.CreatedDate);
+				var db = new Date(b.CreatedDate);
+				if(da > db)
+					return 1;
+				else
+					return -1;
+			}
+
+			(function () {
+				$.getJSON('articles.json', function ( data ) {
+
+					var p = window.location.hash.substring(1,5);
+
+					if(window.location.hash == '')
+					{
+						data.BlogPosts.sort(datesort);
+
+						var page = 1;
+
+						for(post in data.BlogPosts)
+						{
+							if(Number(post) >= PostsOnPage)
+								break;
+
+							$.get({
+								url: data.BlogPosts[post].Path,
+								success: function ( data2 ) {
+									var template = 
+										'<div class="border-0 rounded maincontent">' + 
+											'<h2 id="postTitle">' + 
+												data.BlogPosts[post].PostTitle + 
+											'</h2>' +
+											'<span id="authorTime">' + 
+												'Written By ' + data.BlogPosts[post].Author + ' on ' + data.BlogPosts[post].CreatedDate +
+											'</span>' +
+											'<div id="content">' + data2 + '</div>' +
+										'</div><div style="height:1em"></div>';
+									
+									$('#posts').prepend(template);
+								},
+								async: false});	
+						}
+
+						for(i = 1; i < data.BlogPosts.length / PostsOnPage; i++)
+						{
+							var p = '<li class="page-item"><a class="page-link" href="#page' + i + '">' + i + '</a></li>'
+
+							$('#pagination').append(p);
+						}
+
+						if(data.BlogPosts.length > PostsOnPage)
+							$('#pagination').append('<li class="page-item"><a class="page-link">Next &gt;</a></li>')
+						
+					}
+					else if(window.location.hash.substring(1,5) == 'page')
+					{
+						data.BlogPosts.sort(datesort);
+
+						var page = Number(window.location.hash.substring(5)) - 1;
+
+						for(post in data.BlogPosts)
+						{
+							if(post < page * PostsOnPage)
+								continue;
+							if(Number(post) >= PostsOnPage + page * PostsOnPage)
+								break;
+
+							$.get({
+								url: data.BlogPosts[post].Path,
+								success: function ( data2 ) {
+									var template = 
+										'<div class="border-0 rounded maincontent">' + 
+											'<h2 id="postTitle">' + 
+												data.BlogPosts[post].PostTitle + 
+											'</h2>' +
+											'<span id="authorTime">' + 
+												'Written By ' + data.BlogPosts[post].Author + ' on ' + data.BlogPosts[post].CreatedDate +
+											'</span>' +
+											'<div id="content">' + data2 + '</div>' +
+										'</div><div style="height:1em"></div>';
+									
+									$('#posts').prepend(template);
+								},
+								async: false});	
+						}
+					}
+				});
+			})();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,1 @@
+var PostsOnPage = 3;
